@@ -1,0 +1,33 @@
+# use base image.
+FROM sloopstash/amazonlinux:v1
+
+# switch work directory.
+WORKDIR /tmp
+
+# install oracle java development kit.
+COPY downloads/jdk-8u131-linux-x64.rpm ./
+RUN set -x \
+  && rpm -Uvh jdk-8u131-linux-x64.rpm \
+  && rm -rf jdk-8u131-linux-x64.rpm
+
+# create user named logstash.
+RUN set -x \
+  && useradd -m -s /bin/bash -d /usr/local/lib/logstash logstash
+
+# install logstash.
+COPY downloads/logstash-6.8.2.tar.gz ./
+RUN set -x \
+  && tar xvzf logstash-6.8.2.tar.gz > /dev/null \
+  && cp -r logstash-6.8.2/* /usr/local/lib/logstash/ \
+  && chown -R logstash:logstash /usr/local/lib/logstash \
+  && rm -rf logstash-6.8.2.tar.gz logstash-6.8.2
+RUN set -x \
+  && mkdir /opt/logstash \
+  && mkdir /opt/logstash/data \
+  && mkdir /opt/logstash/log \
+  && mkdir /opt/logstash/system \
+  && touch /opt/logstash/system/process.pid \
+  && chown -R logstash:logstash /opt/logstash
+
+# switch work directory.
+WORKDIR /
